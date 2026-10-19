@@ -1,0 +1,63 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <title>Produtores - AgroFeira Paragominas</title>
+</head>
+<body>
+    <h1>AgroFeira Paragominas</h1>
+    <h2>Produtores da feira</h2>
+
+    <form method="get" action="{% url 'catalogo:produtores' %}">
+        <label for="q">Pesquisar produtor:</label>
+        <input
+            type="text"
+            id="q"
+            name="q"
+            value="{{ busca }}"
+            placeholder="Nome ou comunidade"
+        >
+        <button type="submit">Pesquisar</button>
+    </form>
+
+    {% if busca %}
+        <p>
+            Busca por "{{ busca }}":
+            {{ produtores|length }}
+            {% if produtores|length == 1 %}
+                produtor encontrado
+            {% else %}
+                produtores encontrados
+            {% endif %}
+        </p>
+    {% endif %}
+
+    {% for produtor in produtores %}
+        <article>
+            <h3>
+                <a href="{% url 'catalogo:produtor' produtor.slug %}">
+                    {{ produtor.nome }}
+                </a>
+            </h3>
+
+            <p>Comunidade: {{ produtor.comunidade }}</p>
+
+            <p>
+                Cooperativa:
+                {% if produtor.cooperativa %}
+                    {{ produtor.cooperativa }}
+                {% else %}
+                    Independente
+                {% endif %}
+            </p>
+
+            <p>
+                Pedido mínimo:
+                {{ produtor.pedido_minimo_centavos }} centavos
+            </p>
+        </article>
+    {% empty %}
+        <p>Nenhum produtor encontrado.</p>
+    {% endfor %}
+</body>
+</html>

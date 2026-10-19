@@ -1,0 +1,33 @@
+{% extends "base.html" %}
+{% load moeda %}
+
+{% block titulo %}Produtos - AgroFeira Paragominas{% endblock %}
+
+{% block conteudo %}
+<h2>Produtos da feira</h2>
+
+{% for produto in produtos %}
+    <article>
+        <h3>
+            <a href="{% url 'catalogo:produto' produto.slug %}">
+                {{ produto.nome }}
+            </a>
+        </h3>
+
+        <p>{{ produto.variedade }}</p>
+
+        <p>
+            Categoria: {{ produto.categoria.nome }}
+        </p>
+
+        <p>
+            Preço: {{ produto.preco_centavos|reais }}
+            por {{ produto.unidade.sigla }}
+        </p>
+
+        <p>{{ produto.descricao }}</p>
+    </article>
+{% empty %}
+    <p>Nenhum produto cadastrado.</p>
+{% endfor %}
+{% endblock %}

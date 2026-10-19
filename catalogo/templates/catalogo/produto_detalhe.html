@@ -1,0 +1,51 @@
+{% extends "base.html" %}
+{% load moeda %}
+
+{% block titulo %}{{ produto.nome }} - AgroFeira Paragominas{% endblock %}
+
+{% block conteudo %}
+<h2>{{ produto.nome }}</h2>
+
+    <p>
+        {{ produto.variedade }} -
+        {{ produto.categoria.nome }}
+    </p>
+
+   <p>
+        <strong>Preço:</strong> 
+        R$ {{ produto.preco_reais|floatformat:2 }} por {{ produto.unidade.sigla }}
+    </p>
+    
+    <p>
+        <strong>Estoque:</strong>
+        {{ produto.estoque }}
+    </p>
+
+    <p>
+        <strong>Descrição:</strong>
+        {{ produto.descricao }}
+    </p>
+
+    <p>
+        <strong>Conservação:</strong>
+        {{ produto.conservacao }}
+    </p>
+
+    <h3>Quem produz</h3>
+
+    <strong>
+        <a href="{% url 'catalogo:produtor' produto.produtor.slug %}">
+            {{ produto.produtor.nome }}
+        </a>
+    </strong>
+
+    <p>
+        Comunidade: {{ produto.produtor.comunidade }}
+    </p>
+
+    <p>
+        <a href="{% url 'catalogo:produtos' %}">
+            Voltar para produtos
+        </a>
+    </p>
+{% endblock %}

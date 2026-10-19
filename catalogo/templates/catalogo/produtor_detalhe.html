@@ -1,0 +1,69 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <title>{{ produtor.nome }} - AgroFeira Paragominas</title>
+</head>
+<body>
+    <h1>AgroFeira Paragominas</h1>
+
+    <p>
+        <a href="{% url 'catalogo:produtores' %}">
+            Voltar para produtores
+        </a>
+    </p>
+
+    <h2>{{ produtor.nome }}</h2>
+
+    <p>{{ produtor.descricao }}</p>
+
+    <h3>Informações do produtor</h3>
+
+    <dl>
+        <dt>Comunidade:</dt>
+        <dd>{{ produtor.comunidade }}</dd>
+
+        <dt>Cooperativa:</dt>
+        <dd>
+            {% if produtor.cooperativa %}
+                {{ produtor.cooperativa }}
+            {% else %}
+                Independente
+            {% endif %}
+        </dd>
+
+        <dt>CAF:</dt>
+        <dd>{{ produtor.caf }}</dd>
+
+        <dt>Formas de pagamento:</dt>
+        <dd>{{ produtor.formas_pagamento }}</dd>
+
+        <dt>Chave Pix:</dt>
+        <dd>{{ produtor.chave_pix }}</dd>
+
+        <dt>Pedido mínimo:</dt>
+        <dd>{{ produtor.pedido_minimo_centavos }} centavos</dd>
+    </dl>
+
+    <h3>Produtos deste produtor</h3>
+
+    {% for produto in produtos %}
+        <article>
+            <h4>
+                <a href="{% url 'catalogo:produto' produto.slug %}">
+                    {{ produto.nome }}
+                </a>
+            </h4>
+
+            <p>Variedade: {{ produto.variedade }}</p>
+
+            <p>Preço: {{ produto.preco_centavos }} centavos</p>
+
+            <p>{{ produto.descricao }}</p>
+        </article>
+    {% empty %}
+        <p>Este produtor ainda não possui produtos cadastrados.</p>
+    {% endfor %}
+
+</body>
+</html>

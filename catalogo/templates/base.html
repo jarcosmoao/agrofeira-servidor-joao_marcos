@@ -1,0 +1,26 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>{% block titulo %}AgroFeira Paragominas{% endblock %}</title>
+</head>
+<body>
+    <header>
+        <h1>AgroFeira Paragominas</h1>
+        <nav>
+            <a href="{% url 'catalogo:inicio' %}">Início</a>
+            <a href="{% url 'catalogo:produtos' %}">Produtos</a>
+            <a href="{% url 'catalogo:produtores' %}">Produtores</a>
+        </nav>
+    </header>
+
+    <main>
+        {% block conteudo %}{% endblock %}
+    </main>
+
+    <footer>
+        <p>AgroFeira Paragominas</p>
+    </footer>
+</body>
+</html>

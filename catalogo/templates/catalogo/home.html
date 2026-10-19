@@ -1,0 +1,24 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+ <meta charset="utf-8">
+ <title>AgroFeira Paragominas</title>
+</head>
+<body>
+ <h1>AgroFeira Paragominas</h1>
+ <p>{{ total }} produtos de agricultores da região, direto de quem planta.
+</p>
+ <h2>Destaques da semana</h2>
+ <ul>
+ {% for p in destaques %}
+ <li>
+ <a href="{% url 'catalogo:produto' slug=p.slug %}">{{ p.nome }}</a>
+-
+ {{ p.produtor.nome }}
+ </li>
+ {% endfor %}
+ </ul>
+ <p><a href="{% url 'catalogo:produtos' %}">Ver todos os {{ total }}
+produtos</a></p>
+</body>
+</html>
