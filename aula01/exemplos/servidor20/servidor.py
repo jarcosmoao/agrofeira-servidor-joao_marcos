@@ -7,6 +7,7 @@ produtos = [
     "Mel de abelha uruçu — pote",
 ]
 
+
 class Handler(BaseHTTPRequestHandler):
     def do_GET(self):
         if self.path == "/":
@@ -22,6 +23,7 @@ class Handler(BaseHTTPRequestHandler):
         self.send_header("Content-Type", "text/html; charset=utf-8")
         self.end_headers()
         self.wfile.write(corpo.encode("utf-8"))
+
 
 if __name__ == "__main__":
     HTTPServer(("0.0.0.0", 8000), Handler).serve_forever()
