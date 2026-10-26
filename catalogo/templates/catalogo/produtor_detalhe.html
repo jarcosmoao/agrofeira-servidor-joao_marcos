@@ -1,3 +1,4 @@
+{% load moeda %}
 <!DOCTYPE html>
 <html lang="pt-BR">
 <head>
@@ -42,7 +43,7 @@
         <dd>{{ produtor.chave_pix }}</dd>
 
         <dt>Pedido mínimo:</dt>
-        <dd>{{ produtor.pedido_minimo_centavos }} centavos</dd>
+        <dd>{{ produtor.pedido_minimo_centavos|reais }}</dd>
     </dl>
 
     <h3>Produtos deste produtor</h3>
@@ -57,7 +58,7 @@
 
             <p>Variedade: {{ produto.variedade }}</p>
 
-            <p>Preço: {{ produto.preco_centavos }} centavos</p>
+            <p>Preço: {{ produto.preco_centavos|reais }} por {{ produto.unidade.sigla }}</p>
 
             <p>{{ produto.descricao }}</p>
         </article>

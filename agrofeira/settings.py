@@ -25,7 +25,11 @@ SECRET_KEY = "django-insecure-+9kk46plv1($$pu!pstpol^q1egpy=8f0tiovh(ed9no8vvx+m
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = ["127.0.0.1", "localhost", ".app.github.dev"]
+ALLOWED_HOSTS = [
+    "localhost",
+    "127.0.0.1",
+    "curly-engine-w65q5w46q4rh97w9-8000.app.github.dev",
+]
 
 
 # Application definition
@@ -126,3 +130,8 @@ MAILERS = {
         "BACKEND": "django.core.mail.backends.console.EmailBackend",
     },
 }
+
+CSRF_TRUSTED_ORIGINS = [
+    "https://curly-engine-w65q5w46q4rh97w9-8000.app.github.dev",
+    "https://localhost:8000",
+]

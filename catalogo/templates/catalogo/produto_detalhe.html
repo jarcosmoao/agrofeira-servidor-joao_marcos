@@ -12,8 +12,8 @@
     </p>
 
    <p>
-        <strong>Preço:</strong> 
-        R$ {{ produto.preco_reais|floatformat:2 }} por {{ produto.unidade.sigla }}
+    <strong>Preço:</strong>
+    {{ produto.preco_centavos|reais }} por {{ produto.unidade.sigla }}
     </p>
     
     <p>

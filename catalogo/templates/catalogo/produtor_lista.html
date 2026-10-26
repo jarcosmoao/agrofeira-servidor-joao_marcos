@@ -1,3 +1,4 @@
+{% load moeda %}
 <!DOCTYPE html>
 <html lang="pt-BR">
 <head>
@@ -53,7 +54,7 @@
 
             <p>
                 Pedido mínimo:
-                {{ produtor.pedido_minimo_centavos }} centavos
+                {{ produtor.pedido_minimo_centavos|reais }}
             </p>
         </article>
     {% empty %}

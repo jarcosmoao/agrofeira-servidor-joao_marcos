@@ -1,3 +1,4 @@
+{% load moeda %}
 <!doctype html>
 <html lang="pt-BR">
 <head>
@@ -12,10 +13,12 @@
  <ul>
  {% for p in destaques %}
  <li>
- <a href="{% url 'catalogo:produto' slug=p.slug %}">{{ p.nome }}</a>
--
- {{ p.produtor.nome }}
- </li>
+    <a href="{% url 'catalogo:produto' slug=p.slug %}">
+        {{ p.nome }}
+    </a>
+    — {{ p.produtor.nome }}
+    — {{ p.preco_centavos|reais }} por {{ p.unidade.sigla }}
+</li>
  {% endfor %}
  </ul>
  <p><a href="{% url 'catalogo:produtos' %}">Ver todos os {{ total }}

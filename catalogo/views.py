@@ -1,84 +1,68 @@
-from django.http import Http404
-from django.shortcuts import render
-from .dados import PRODUTOS, PRODUTORES
+from django.shortcuts import get_object_or_404, redirect, render
+from .models import Produto, Produtor
 
 
 def home(request):
-    destaques = [p for p in PRODUTOS if p["destaque"]]
-    contexto = {"destaques": destaques, "total": len(PRODUTOS)}
+    destaques = Produto.objects.filter(destaque=True)
+    contexto = {
+        "destaques": destaques,
+        "total": Produto.objects.count(),
+    }
     return render(request, "catalogo/home.html", contexto)
 
 
 def produtos(request):
-    return render(
-        request,
-        "catalogo/produto_lista.html",
-        {"produtos": PRODUTOS}
-    )
+    busca = request.GET.get("q", "")
+    lista = Produto.objects.all()
+
+    if busca:
+        lista = lista.filter(nome__icontains=busca)
+
+    contexto = {
+        "produtos": lista,
+        "busca": busca,
+    }
+    return render(request, "catalogo/produto_lista.html", contexto)
 
 
 def produto(request, slug):
-    for p in PRODUTOS:
-        if p["slug"] == slug:
-            contexto = {"produto": p}
-            p["preco_reais"] = p["preco_centavos"] / 100
-            return render(
-                request,
-                "catalogo/produto_detalhe.html",
-                contexto
-            )
-    raise Http404("Nenhum produto com esse endereço.")
-
-
-def produtores(request):
-    busca = request.GET.get("q", "").strip()
-
-    lista_produtores = PRODUTORES
-
-    if busca:
-        termo = busca.casefold()
-
-        lista_produtores = [
-            p for p in PRODUTORES
-            if termo in p["nome"].casefold()
-            or termo in p["comunidade"].casefold()
-        ]
-
-    contexto = {
-        "produtores": lista_produtores,
-        "busca": busca,
-    }
-
+    p = get_object_or_404(Produto, slug=slug)
     return render(
         request,
-        "catalogo/produtor_lista.html",
-        contexto
+        "catalogo/produto_detalhe.html",
+        {"produto": p},
     )
 
 
-def produtor(request, slug):
-    produtor_encontrado = None
+def catalogo_antigo(request):
+    return redirect("catalogo:produtos", permanent=True)
 
-    for p in PRODUTORES:
-        if p["slug"] == slug:
-            produtor_encontrado = p
-            break
 
-    if produtor_encontrado is None:
-        raise Http404("Nenhum produtor com esse endereço.")
+def produtores(request):
+    busca = request.GET.get("q", "")
+    lista = Produtor.objects.all()
 
-    produtos_do_produtor = [
-        p for p in PRODUTOS
-        if p["produtor"] == produtor_encontrado
-    ]
+    if busca:
+        lista = (
+            lista.filter(nome__icontains=busca)
+            | lista.filter(comunidade__icontains=busca)
+        )
 
     contexto = {
-        "produtor": produtor_encontrado,
-        "produtos": produtos_do_produtor,
+        "produtores": lista,
+        "busca": busca,
     }
+    return render(request, "catalogo/produtor_lista.html", contexto)
 
+
+def produtor(request, slug):
+    pr = get_object_or_404(Produtor, slug=slug)
+    contexto = {
+        "produtor": pr,
+        "produtos": pr.produtos.all(),
+    }
     return render(
         request,
         "catalogo/produtor_detalhe.html",
-        contexto
+        contexto,
     )
