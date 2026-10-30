@@ -1,5 +1,5 @@
 from django.shortcuts import get_object_or_404, redirect, render
-from .models import Produto, Produtor
+from .models import Categoria, Produto, Produtor
 from django.core.paginator import Paginator
 from django.utils import timezone
 from django.db.models import Count, Q
@@ -23,20 +23,58 @@ def home(request):
 
 def produtos(request):
     busca = request.GET.get("q", "")
-    lista = Produto.objects.all()
+    categoria = request.GET.get("categoria", "")
+    produtor = request.GET.get("produtor", "")
+    ordem = request.GET.get("ordem", "nome")
+
+    lista = Produto.objects.select_related(
+        "categoria", "produtor", "unidade"
+    )
 
     if busca:
         lista = lista.filter(nome__icontains=busca)
 
-    contexto = {
-        "produtos": lista,
-        "busca": busca,
+    if categoria:
+        lista = lista.filter(categoria__slug=categoria)
+
+    if produtor:
+        lista = lista.filter(produtor__slug=produtor)
+
+    ordenacoes = {
+        "nome": "nome",
+        "preco": "preco_centavos",
+        "-preco": "-preco_centavos",
     }
+
+    lista = lista.order_by(ordenacoes.get(ordem, "nome"))
+
+    pagina = Paginator(lista, 12).get_page(request.GET.get("page"))
+
+    parametros = request.GET.copy()
+    parametros.pop("page", None)
+    parametros = parametros.urlencode()
+
+    if parametros:
+        parametros += "&"
+
+    contexto = {
+        "page_obj": pagina,
+        "busca": busca,
+        "categoria": categoria,
+        "produtor": produtor,
+        "ordem": ordem if ordem in ordenacoes else "nome",
+        "categorias": Categoria.objects.order_by("nome"),
+        "produtores": Produtor.objects.order_by("nome"),
+        "parametros": parametros,
+    }
+
     return render(request, "catalogo/produto_lista.html", contexto)
 
-
 def produto(request, slug):
-    p = get_object_or_404(Produto, slug=slug)
+    p = get_object_or_404(
+        Produto.objects.select_related("categoria", "produtor", "unidade"),
+        slug=slug,
+    )
     return render(
         request,
         "catalogo/produto_detalhe.html",
@@ -79,10 +117,15 @@ def produtores(request):
     return render(request, "catalogo/produtor_lista.html", contexto)
 
 def produtor(request, slug):
-    pr = get_object_or_404(Produtor, slug=slug)
+    pr = get_object_or_404(
+        Produtor.objects.prefetch_related("propriedades"),
+        slug=slug,
+    )
     contexto = {
         "produtor": pr,
-        "produtos": pr.produtos.all(),
+        "produtos": pr.produtos.select_related(
+            "categoria", "produtor", "unidade"
+        ),
     }
     return render(
         request,

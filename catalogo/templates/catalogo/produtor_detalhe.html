@@ -4,69 +4,39 @@
 {% block titulo %}{{ produtor.nome }} - AgroFeira Paragominas{% endblock %}
 
 {% block conteudo %}
-<section>
-    <p>
-        <a href="{% url 'catalogo:produtores' %}">
-            &larr; Voltar para produtores
-        </a>
-    </p>
+  <p class="trilha">
+    <a href="{% url 'catalogo:inicio' %}">Início</a> &rsaquo;
+    <a href="{% url 'catalogo:produtores' %}">Produtores</a> &rsaquo;
+    {{ produtor.nome }}
+  </p>
 
+  <section class="perfil">
     <h1>{{ produtor.nome }}</h1>
-
+    <p class="comunidade">{{ produtor.comunidade }}</p>
     <p>{{ produtor.descricao }}</p>
-
-    <h2>Informações do produtor</h2>
-
     <dl>
-        <dt>Comunidade:</dt>
-        <dd>{{ produtor.comunidade }}</dd>
-
-        <dt>Cooperativa:</dt>
-        <dd>
-            {% if produtor.cooperativa %}
-                {{ produtor.cooperativa }}
-            {% else %}
-                Independente
-            {% endif %}
-        </dd>
-
-        <dt>CAF:</dt>
-        <dd>{{ produtor.caf }}</dd>
-
-        <dt>Formas de pagamento:</dt>
-        <dd>{{ produtor.formas_pagamento }}</dd>
-
-        <dt>Chave Pix:</dt>
-        <dd>{{ produtor.chave_pix }}</dd>
-
-        <dt>Pedido mínimo:</dt>
-        <dd>{{ produtor.pedido_minimo_centavos|reais }}</dd>
+      <dt>CAF</dt><dd>{{ produtor.caf }}</dd>
+      <dt>Cooperativa</dt><dd>{{ produtor.cooperativa|default:"independente" }}</dd>
+      <dt>Pagamento</dt><dd>{{ produtor.formas_pagamento }}</dd>
+      <dt>Chave Pix</dt><dd>{{ produtor.chave_pix }}</dd>
+      <dt>Pedido mínimo</dt><dd>{{ produtor.pedido_minimo_centavos|reais }}</dd>
     </dl>
+  </section>
 
-    <h2>Produtos deste produtor</h2>
+  <section class="propriedades">
+    <h2>Propriedades</h2>
+    <ul>
+      {% for prop in produtor.propriedades.all %}
+        <li><strong>{{ prop.nome }}</strong> - {{ prop.comunidade }}, {{ prop.distancia_sede_km }} km da sede,
+            {{ prop.area_total_ha }} ha, manejo {{ prop.get_manejo_display }}</li>
+      {% endfor %}
+    </ul>
+  </section>
 
-    <div class="produtos">
-        {% for produto in produtos %}
-            <article>
-                <h3>
-                    <a href="{% url 'catalogo:produto' produto.slug %}">
-                        {{ produto.nome }}
-                    </a>
-                </h3>
-
-                <p>Variedade: {{ produto.variedade }}</p>
-
-                <p>
-                    Preço:
-                    {{ produto.preco_centavos|reais }}
-                    por {{ produto.unidade.sigla }}
-                </p>
-
-                <p>{{ produto.descricao }}</p>
-            </article>
-        {% empty %}
-            <p>Este produtor ainda não possui produtos cadastrados.</p>
-        {% endfor %}
-    </div>
-</section>
+  <h2>Produtos deste produtor</h2>
+  <div class="grade">
+    {% for p in produtos %}
+      {% include "catalogo/_cartao_produto.html" with produto=p %}
+    {% endfor %}
+  </div>
 {% endblock %}
