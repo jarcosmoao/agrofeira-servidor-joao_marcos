@@ -1,4 +1,5 @@
 from django.db import models
+from .querysets import ProdutoQuerySet
 
 
 class Categoria(models.Model):
@@ -104,6 +105,7 @@ class Produto(models.Model):
         "conservação", max_length=120, blank=True
     )
     validade = models.DateField(null=True, blank=True)
+    objects = ProdutoQuerySet.as_manager()
 
     class Meta:
         ordering = ["nome"]

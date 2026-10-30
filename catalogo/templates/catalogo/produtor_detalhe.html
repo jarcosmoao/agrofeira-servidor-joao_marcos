@@ -1,24 +1,21 @@
+{% extends "base.html" %}
 {% load moeda %}
-<!DOCTYPE html>
-<html lang="pt-BR">
-<head>
-    <meta charset="UTF-8">
-    <title>{{ produtor.nome }} - AgroFeira Paragominas</title>
-</head>
-<body>
-    <h1>AgroFeira Paragominas</h1>
 
+{% block titulo %}{{ produtor.nome }} - AgroFeira Paragominas{% endblock %}
+
+{% block conteudo %}
+<section>
     <p>
         <a href="{% url 'catalogo:produtores' %}">
-            Voltar para produtores
+            &larr; Voltar para produtores
         </a>
     </p>
 
-    <h2>{{ produtor.nome }}</h2>
+    <h1>{{ produtor.nome }}</h1>
 
     <p>{{ produtor.descricao }}</p>
 
-    <h3>Informações do produtor</h3>
+    <h2>Informações do produtor</h2>
 
     <dl>
         <dt>Comunidade:</dt>
@@ -46,25 +43,30 @@
         <dd>{{ produtor.pedido_minimo_centavos|reais }}</dd>
     </dl>
 
-    <h3>Produtos deste produtor</h3>
+    <h2>Produtos deste produtor</h2>
 
-    {% for produto in produtos %}
-        <article>
-            <h4>
-                <a href="{% url 'catalogo:produto' produto.slug %}">
-                    {{ produto.nome }}
-                </a>
-            </h4>
+    <div class="produtos">
+        {% for produto in produtos %}
+            <article>
+                <h3>
+                    <a href="{% url 'catalogo:produto' produto.slug %}">
+                        {{ produto.nome }}
+                    </a>
+                </h3>
 
-            <p>Variedade: {{ produto.variedade }}</p>
+                <p>Variedade: {{ produto.variedade }}</p>
 
-            <p>Preço: {{ produto.preco_centavos|reais }} por {{ produto.unidade.sigla }}</p>
+                <p>
+                    Preço:
+                    {{ produto.preco_centavos|reais }}
+                    por {{ produto.unidade.sigla }}
+                </p>
 
-            <p>{{ produto.descricao }}</p>
-        </article>
-    {% empty %}
-        <p>Este produtor ainda não possui produtos cadastrados.</p>
-    {% endfor %}
-
-</body>
-</html>
+                <p>{{ produto.descricao }}</p>
+            </article>
+        {% empty %}
+            <p>Este produtor ainda não possui produtos cadastrados.</p>
+        {% endfor %}
+    </div>
+</section>
+{% endblock %}

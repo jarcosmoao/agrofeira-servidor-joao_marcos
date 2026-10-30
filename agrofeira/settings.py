@@ -43,9 +43,11 @@ INSTALLED_APPS = [
     "django.contrib.staticfiles",
     "catalogo",
     'pedidos',
+    "debug_toolbar",
 ]
 
 MIDDLEWARE = [
+    "debug_toolbar.middleware.DebugToolbarMiddleware",
     "django.middleware.security.SecurityMiddleware",
     "django.contrib.sessions.middleware.SessionMiddleware",
     "django.middleware.common.CommonMiddleware",
@@ -122,6 +124,7 @@ USE_TZ = True
 
 STATIC_URL = "static/"
 
+STATICFILES_DIRS = [BASE_DIR / 'static']
 
 # Email
 # https://docs.djangoproject.com/en/6.1/topics/email/#topic-email-configuration
@@ -136,3 +139,5 @@ CSRF_TRUSTED_ORIGINS = [
     "https://curly-engine-w65q5w46q4rh97w9-8000.app.github.dev",
     "https://localhost:8000",
 ]
+
+INTERNAL_IPS = ["127.0.0.1"]

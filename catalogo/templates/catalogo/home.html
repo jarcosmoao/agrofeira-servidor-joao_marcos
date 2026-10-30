@@ -1,27 +1,46 @@
+{% extends "base.html" %}
 {% load moeda %}
-<!doctype html>
-<html lang="pt-BR">
-<head>
- <meta charset="utf-8">
- <title>AgroFeira Paragominas</title>
-</head>
-<body>
- <h1>AgroFeira Paragominas</h1>
- <p>{{ total }} produtos de agricultores da região, direto de quem planta.
-</p>
- <h2>Destaques da semana</h2>
- <ul>
- {% for p in destaques %}
- <li>
-    <a href="{% url 'catalogo:produto' slug=p.slug %}">
-        {{ p.nome }}
+
+{% block titulo %}Início - AgroFeira Paragominas{% endblock %}
+
+{% block conteudo %}
+<section class="apresentacao">
+    <h1>AgroFeira Paragominas</h1>
+
+    <p>
+        {{ total }} produtos de agricultores da região,
+        direto de quem planta.
+    </p>
+</section>
+
+<section>
+    <h2>Destaques da semana</h2>
+
+    <div class="produtos">
+        {% for p in destaques %}
+            <article>
+                <h3>
+                    <a href="{% url 'catalogo:produto' slug=p.slug %}">
+                        {{ p.nome }}
+                    </a>
+                </h3>
+
+                <p>{{ p.produtor.nome }}</p>
+
+                <p>
+                    {{ p.preco_centavos|reais }}
+                    por {{ p.unidade.sigla }}
+                </p>
+            </article>
+        {% empty %}
+            <p>Nenhum produto em destaque neste momento.</p>
+        {% endfor %}
+    </div>
+</section>
+
+<p>
+    <a href="{% url 'catalogo:produtos' %}">
+        Ver todos os {{ total }} produtos
     </a>
-    — {{ p.produtor.nome }}
-    — {{ p.preco_centavos|reais }} por {{ p.unidade.sigla }}
-</li>
- {% endfor %}
- </ul>
- <p><a href="{% url 'catalogo:produtos' %}">Ver todos os {{ total }}
-produtos</a></p>
-</body>
-</html>
+</p>
+{% endblock %}

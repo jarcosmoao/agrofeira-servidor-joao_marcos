@@ -1,13 +1,11 @@
+{% extends "base.html" %}
 {% load moeda %}
-<!DOCTYPE html>
-<html lang="pt-BR">
-<head>
-    <meta charset="UTF-8">
-    <title>Produtores - AgroFeira Paragominas</title>
-</head>
-<body>
-    <h1>AgroFeira Paragominas</h1>
-    <h2>Produtores da feira</h2>
+
+{% block titulo %}Produtores - AgroFeira Paragominas{% endblock %}
+
+{% block conteudo %}
+<section>
+    <h1>Produtores da feira</h1>
 
     <form method="get" action="{% url 'catalogo:produtores' %}">
         <label for="q">Pesquisar produtor:</label>
@@ -22,43 +20,65 @@
     </form>
 
     {% if busca %}
-        <p>
+        <p class="contagem">
             Busca por "{{ busca }}":
-            {{ produtores|length }}
-            {% if produtores|length == 1 %}
-                produtor encontrado
-            {% else %}
-                produtores encontrados
-            {% endif %}
+            {{ page_obj.paginator.count }}
+            produtores encontrados
         </p>
     {% endif %}
 
-    {% for produtor in produtores %}
-        <article>
-            <h3>
-                <a href="{% url 'catalogo:produtor' produtor.slug %}">
-                    {{ produtor.nome }}
-                </a>
-            </h3>
+    <div class="produtores">
+        {% for produtor in page_obj %}
+            <article>
+                <h2>
+                    <a href="{% url 'catalogo:produtor' produtor.slug %}">
+                        {{ produtor.nome }}
+                    </a>
+                </h2>
 
-            <p>Comunidade: {{ produtor.comunidade }}</p>
+                <p>Comunidade: {{ produtor.comunidade }}</p>
 
-            <p>
-                Cooperativa:
-                {% if produtor.cooperativa %}
-                    {{ produtor.cooperativa }}
-                {% else %}
-                    Independente
-                {% endif %}
-            </p>
+                <p>Produtos cadastrados: {{ produtor.num_produtos }}</p>
 
-            <p>
-                Pedido mínimo:
-                {{ produtor.pedido_minimo_centavos|reais }}
-            </p>
-        </article>
-    {% empty %}
-        <p>Nenhum produtor encontrado.</p>
-    {% endfor %}
-</body>
-</html>
+                <p class="sitios">
+                    Sítios: {{ produtor.propriedades.all|join:", " }}
+                </p>
+
+                <p>
+                    Cooperativa:
+                    {% if produtor.cooperativa %}
+                        {{ produtor.cooperativa }}
+                    {% else %}
+                        Independente
+                    {% endif %}
+                </p>
+
+                <p>
+                    Pedido mínimo:
+                    {{ produtor.pedido_minimo_centavos|reais }}
+                </p>
+            </article>
+        {% empty %}
+            <p>Nenhum produtor encontrado.</p>
+        {% endfor %}
+    </div>
+
+    <nav class="paginacao">
+        {% if page_obj.has_previous %}
+            <a href="?{{ parametros }}page={{ page_obj.previous_page_number }}">
+                &lsaquo; Anterior
+            </a>
+        {% endif %}
+
+        <span>
+            Página {{ page_obj.number }} de {{ page_obj.paginator.num_pages }}
+        </span>
+
+        {% if page_obj.has_next %}
+            <a href="?{{ parametros }}page={{ page_obj.next_page_number }}">
+                Próxima &rsaquo;
+            </a>
+        {% endif %}
+    </nav>
+</section>
+{% endblock %}

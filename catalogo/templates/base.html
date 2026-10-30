@@ -1,13 +1,18 @@
+{% load static %}
 <!doctype html>
 <html lang="pt-BR">
 <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <title>{% block titulo %}AgroFeira Paragominas{% endblock %}</title>
+    <link rel="stylesheet" href="{% static 'css/agrofeira.css' %}">
 </head>
 <body>
-    <header>
-        <h1>AgroFeira Paragominas</h1>
+    <header class="topo">
+        <a class="marca" href="{% url 'catalogo:inicio' %}">
+            AgroFeira <span>Paragominas</span>
+        </a>
+
         <nav>
             <a href="{% url 'catalogo:inicio' %}">Início</a>
             <a href="{% url 'catalogo:produtos' %}">Produtos</a>
@@ -19,7 +24,7 @@
         {% block conteudo %}{% endblock %}
     </main>
 
-    <footer>
+    <footer class="rodape">
         <p>AgroFeira Paragominas</p>
     </footer>
 </body>
