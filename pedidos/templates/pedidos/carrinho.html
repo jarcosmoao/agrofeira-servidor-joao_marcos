@@ -42,7 +42,7 @@
     </table>
 
     <div class="acoes">
-      <a class="botao" href="/checkout/">Fechar o pedido</a>
+      <a class="botao" href="{% url 'pedidos:checkout' %}">Fechar o pedido</a>
       <form method="post" action="{% url 'pedidos:esvaziar' %}">
         {% csrf_token %}
         <button type="submit" class="secundario">Esvaziar o carrinho</button>
