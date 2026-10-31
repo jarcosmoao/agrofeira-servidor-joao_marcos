@@ -23,6 +23,21 @@
         {{ produto.estoque }}
     </p>
 
+    <form class="adicionar" method="post">
+        {% csrf_token %}
+
+        <label for="{{ form.quantidade.id_for_label }}">
+            Quantidade ({{ produto.unidade.sigla }})
+        </label>
+
+        {{ form.quantidade }}
+
+        <button type="submit">Adicionar ao carrinho</button>
+
+        {{ form.quantidade.errors }}
+        {{ form.non_field_errors }}
+    </form>
+
     <p>
         <strong>Descrição:</strong>
         {{ produto.descricao }}

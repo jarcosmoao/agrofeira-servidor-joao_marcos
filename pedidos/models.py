@@ -1,5 +1,6 @@
 from django.db import models
 from catalogo.models import Produto, Produtor
+import uuid
 
 
 class PontoRetirada(models.Model):
@@ -22,6 +23,7 @@ class PontoRetirada(models.Model):
         return self.nome
 
 class Pedido(models.Model):
+    codigo = models.UUIDField(default=uuid.uuid4, editable=False, unique=True)
     comprador = models.CharField(max_length=150)
     telefone = models.CharField(max_length=20)
 

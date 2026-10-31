@@ -5,4 +5,5 @@ from django.urls import include, path
 urlpatterns = [
     path("admin/", admin.site.urls),
     path("", include("catalogo.urls")),
+    path('', include('pedidos.urls')),
 ] + debug_toolbar_urls()

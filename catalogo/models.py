@@ -99,7 +99,7 @@ class Produto(models.Model):
     )
 
     preco_centavos = models.PositiveIntegerField()
-    estoque = models.PositiveIntegerField(default=0)
+    estoque = models.DecimalField(max_digits=10, decimal_places=3, default=0)
     destaque = models.BooleanField(default=False)
     conservacao = models.CharField(
         "conservação", max_length=120, blank=True

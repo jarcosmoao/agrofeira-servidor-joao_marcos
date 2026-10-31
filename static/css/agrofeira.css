@@ -218,3 +218,71 @@ h2 { color: var(--verde); margin: 8px 0 16px; }
 .propriedades { margin: 22px 0 8px; }
 .propriedades ul { margin: 6px 0 0; padding-left: 20px; }
 .propriedades li { margin: 4px 0; }
+
+/* ---- Encontro 5: mensagens, formulários, carrinho e fechamento do pedido ---- */
+.mensagens { list-style: none; margin: 0 0 20px; padding: 0; }
+.mensagens li {
+  padding: 10px 14px; margin: 0 0 8px; border-radius: 8px;
+  border: 1px solid var(--borda); border-left-width: 5px; background: #fff;
+}
+.mensagens .success { border-left-color: var(--verde); background: var(--verde-claro); }
+.mensagens .error { border-left-color: #b3261e; background: #fbeae9; }
+.mensagens .warning { border-left-color: #b26a00; background: #fff4e0; }
+
+.errorlist {
+  list-style: none; margin: 6px 0 0; padding: 8px 12px; border-radius: 6px;
+  background: #fbeae9; border-left: 4px solid #b3261e; color: #7a1812;
+  font-size: .92rem;
+}
+.errorlist li { margin: 2px 0; }
+
+.adicionar {
+  display: flex; flex-wrap: wrap; align-items: center; gap: 8px 12px; margin: 18px 0;
+}
+.adicionar label { font-weight: 600; }
+.adicionar input {
+  width: 7rem; padding: 8px 10px; border: 1px solid var(--borda);
+  border-radius: 8px; font: inherit;
+}
+.adicionar button, button.secundario, .dados-pedido button {
+  background: var(--verde); color: #fff; border: 0; border-radius: 8px;
+  padding: 9px 16px; font: inherit; font-weight: 600; cursor: pointer;
+}
+button.secundario { background: #fff; color: var(--verde); border: 1px solid var(--verde); }
+.adicionar .errorlist { flex-basis: 100%; margin: 0; }
+
+.carrinho { width: 100%; border-collapse: collapse; background: #fff;
+  border: 1px solid var(--borda); border-radius: 10px; overflow: hidden; }
+.carrinho th, .carrinho td { padding: 10px 14px; text-align: left;
+  border-bottom: 1px solid var(--borda); }
+.carrinho th { background: var(--verde-claro); color: var(--verde); }
+.carrinho td:last-child, .carrinho th:last-child { text-align: right; }
+.carrinho tfoot td { font-weight: 700; border-bottom: 0; }
+.acoes { display: flex; gap: 12px; align-items: center; margin-top: 18px; }
+.acoes form { margin: 0; }
+
+.checkout { display: grid; grid-template-columns: 3fr 2fr; gap: 28px; align-items: start; }
+.dados-pedido, .resumo-pedido {
+  background: #fff; border: 1px solid var(--borda); border-radius: 14px; padding: 22px 26px;
+}
+.dados-pedido .campo { display: flex; flex-direction: column; gap: 4px; margin-bottom: 14px; }
+.dados-pedido label { font-weight: 600; }
+.dados-pedido input, .dados-pedido select {
+  padding: 9px 11px; border: 1px solid var(--borda); border-radius: 8px; font: inherit;
+}
+.resumo-pedido h3 { margin: 0 0 8px; color: var(--verde); }
+.resumo-pedido ul { list-style: none; margin: 0; padding: 0; }
+.resumo-pedido li { display: flex; justify-content: space-between; gap: 12px;
+  padding: 6px 0; border-bottom: 1px solid var(--borda); font-size: .94rem; }
+.resumo-pedido .total { font-weight: 700; text-align: right; margin: 12px 0 0; }
+
+.confirmacao { background: #fff; border: 1px solid var(--borda); border-radius: 14px;
+  padding: 24px 28px; }
+.confirmacao .codigo { font-family: ui-monospace, Menlo, Consolas, monospace;
+  background: var(--verde-claro); padding: 4px 10px; border-radius: 6px; font-size: .95rem; }
+.confirmacao h3 { margin: 18px 0 6px; color: var(--verde); }
+
+@media (max-width: 760px) {
+  .checkout { grid-template-columns: 1fr; }
+}
+.acoes .botao { background: var(--verde); color: #fff; }

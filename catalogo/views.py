@@ -3,6 +3,9 @@ from .models import Categoria, Produto, Produtor
 from django.core.paginator import Paginator
 from django.utils import timezone
 from django.db.models import Count, Q
+from django.contrib import messages
+from pedidos import carrinho
+from pedidos.forms import AdicionarAoCarrinhoForm
 
 
 def home(request):
@@ -73,13 +76,31 @@ def produtos(request):
 def produto(request, slug):
     p = get_object_or_404(
         Produto.objects.select_related("categoria", "produtor", "unidade"),
-        slug=slug,
+        slug=slug
     )
-    return render(
-        request,
-        "catalogo/produto_detalhe.html",
-        {"produto": p},
-    )
+
+    if request.method == "POST":
+        form = AdicionarAoCarrinhoForm(request.POST, produto=p)
+
+        if form.is_valid():
+            carrinho.adicionar(
+                request.session,
+                p,
+                form.cleaned_data["quantidade"]
+            )
+
+            messages.success(request, f"{p.nome} entrou no carrinho.")
+            return redirect("pedidos:carrinho")
+
+    else:
+        form = AdicionarAoCarrinhoForm(
+            initial={"quantidade": 1},
+            produto=p
+        )
+
+    contexto = {"produto": p, "form": form}
+
+    return render(request, "catalogo/produto_detalhe.html", contexto)
 
 
 def catalogo_antigo(request):
