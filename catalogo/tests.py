@@ -152,3 +152,73 @@ class PaginasTests(CatalogoBase):
             resposta.context["produto"],
             self.cupuacu,
         )
+
+class SafraQueAtravessaOAnoTests(CatalogoBase):
+
+    @classmethod
+    def setUpTestData(cls):
+        super().setUpTestData()
+
+        cls.cupuacu_virando = Produto.objects.create(
+            nome="Cupuaçu de inverno",
+            slug="cupuacu-de-inverno",
+            categoria=cls.frutas,
+            produtor=cls.produtor,
+            unidade=cls.quilo,
+            preco_centavos=1500,
+            estoque=Decimal("10"),
+        )
+
+        cls.safra_virando = JanelaSafra.objects.create(
+            produto=cls.cupuacu_virando,
+            mes_inicio=11,
+            mes_fim=2,
+            situacao="pico",
+        )
+
+        cls.cupuacu_dezembro = Produto.objects.create(
+            nome="Cupuaçu de dezembro",
+            slug="cupuacu-de-dezembro",
+            categoria=cls.frutas,
+            produtor=cls.produtor,
+            unidade=cls.quilo,
+            preco_centavos=1800,
+            estoque=Decimal("10"),
+        )
+
+        cls.safra_dezembro = JanelaSafra.objects.create(
+            produto=cls.cupuacu_dezembro,
+            mes_inicio=12,
+            mes_fim=12,
+            situacao="disponivel",
+        )
+
+    def test_safra_que_vira_o_ano(self):
+        for mes in (11, 12, 1, 2):
+            with self.subTest(mes=mes):
+                self.assertIn(
+                    self.cupuacu_virando,
+                    Produto.objects.disponiveis_em(mes),
+                )
+
+        for mes in (3, 6, 10):
+            with self.subTest(mes=mes):
+                self.assertNotIn(
+                    self.cupuacu_virando,
+                    Produto.objects.disponiveis_em(mes),
+                )
+
+    def test_janela_de_um_mes_so_vale_naquele_mes(self):
+        for mes in (12,):
+            with self.subTest(mes=mes):
+                self.assertIn(
+                    self.cupuacu_dezembro,
+                    Produto.objects.disponiveis_em(mes),
+                )
+
+        for mes in (11, 1):
+            with self.subTest(mes=mes):
+                self.assertNotIn(
+                    self.cupuacu_dezembro,
+                    Produto.objects.disponiveis_em(mes),
+                )

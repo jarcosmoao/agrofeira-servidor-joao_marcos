@@ -6,7 +6,7 @@ from django.db import transaction
 from catalogo.models import Categoria, Produto, Produtor, Unidade
 from pedidos import servicos
 from pedidos.carrinho import subtotal_centavos
-from pedidos.models import Pedido, PontoRetirada
+from pedidos.models import Pedido, PontoRetirada, ItemPedido
 from pedidos.forms import AdicionarAoCarrinhoForm
 from django.urls import reverse
 
@@ -182,6 +182,130 @@ class CriarPedidoTests(BaseDeTeste):
         pedido = servicos.criar_pedido(carrinho, self.dados)
         self.assertEqual(pedido.itens.count(), 2)
 
+class CriarPedidoRegrasTests(BaseDeTeste):
+
+    def test_carrinho_vazio_e_recusado(self):
+        with self.assertRaises(ValidationError):
+            servicos.criar_pedido({}, self.dados)
+
+        self.assertEqual(Pedido.objects.count(), 0)
+
+    def test_quantidade_invalida_e_recusada(self):
+        for quantidade in ("1.5", "0"):
+            with self.subTest(quantidade=quantidade):
+                carrinho = {
+                    str(self.jambu.pk): quantidade
+                }
+
+                with self.assertRaises(ValidationError):
+                    servicos.criar_pedido(carrinho, self.dados)
+
+        self.assertEqual(Pedido.objects.count(), 0)
+
+    def test_estoque_insuficiente_e_recusado(self):
+        carrinho = {
+            str(self.jambu.pk): "51"
+        }
+
+        with self.assertRaises(ValidationError):
+            servicos.criar_pedido(carrinho, self.dados)
+
+        self.assertEqual(Pedido.objects.count(), 0)
+
+    def test_produto_que_sumiu_do_banco_e_recusado(self):
+        pk = self.jambu.pk
+        self.jambu.delete()
+
+        carrinho = {
+            str(pk): "3"
+        }
+
+        with self.assertRaises(ValidationError):
+            servicos.criar_pedido(carrinho, self.dados)
+
+        self.assertEqual(Pedido.objects.count(), 0)
+
+    def test_preco_e_retrato_do_produto_ficam_preservados(self):
+        carrinho = {
+            str(self.jambu.pk): "3",
+            str(self.farinha.pk): "3",
+        }
+
+        pedido = servicos.criar_pedido(carrinho, self.dados)
+
+        item_jambu = pedido.itens.get(produto=self.jambu)
+        item_farinha = pedido.itens.get(produto=self.farinha)
+
+        self.assertEqual(item_jambu.preco_unitario_centavos, 400)
+        self.assertEqual(item_jambu.nome_produto, "Jambu")
+        self.assertEqual(item_jambu.nome_produtor, "Irmãos Sousa")
+        self.assertEqual(item_jambu.nome_unidade, "maço")
+
+        self.assertEqual(item_farinha.preco_unitario_centavos, 1000)
+        self.assertEqual(item_farinha.nome_produto, "Farinha seca")
+        self.assertEqual(item_farinha.nome_produtor, "Seu Tonico")
+        self.assertEqual(item_farinha.nome_unidade, "quilo")
+
+        Produto.objects.filter(pk=self.jambu.pk).update(
+            preco_centavos=900
+        )
+
+        item_jambu.refresh_from_db()
+        self.assertEqual(item_jambu.preco_unitario_centavos, 400)
+
+    def test_baixa_o_estoque_dos_dois_produtos(self):
+        carrinho = {
+            str(self.jambu.pk): "3",
+            str(self.farinha.pk): "3",
+        }
+
+        servicos.criar_pedido(carrinho, self.dados)
+
+        self.jambu.refresh_from_db()
+        self.farinha.refresh_from_db()
+
+        self.assertEqual(self.jambu.estoque, Decimal("47"))
+        self.assertEqual(self.farinha.estoque, Decimal("57"))
+
+class TransacaoDoPedidoTests(BaseDeTeste):
+
+    def test_falha_na_gravacao_desfaz_pedido_itens_e_estoque(self):
+        carrinho = {
+            str(self.jambu.pk): "3",
+            str(self.farinha.pk): "3",
+        }
+
+        estoque_antes = Produto.objects.get(
+            pk=self.jambu.pk
+        ).estoque
+
+        cria_de_verdade = ItemPedido.objects.create
+        chamadas = []
+
+        def cria_primeiro_e_falha_no_segundo(**campos):
+            chamadas.append(campos)
+
+            if len(chamadas) == 2:
+                raise RuntimeError("falha plantada")
+
+            return cria_de_verdade(**campos)
+
+        with mock.patch.object(
+            ItemPedido.objects,
+            "create",
+            side_effect=cria_primeiro_e_falha_no_segundo
+        ):
+            with self.assertRaises(RuntimeError):
+                servicos.criar_pedido(carrinho, self.dados)
+
+        self.assertEqual(len(chamadas), 2)
+        self.assertEqual(Pedido.objects.count(), 0)
+        self.assertEqual(ItemPedido.objects.count(), 0)
+
+        self.jambu.refresh_from_db()
+
+        self.assertEqual(self.jambu.estoque, estoque_antes)
+
 def criar_duas_categorias():
     """Função de brinquedo, só para ensaiar a transação: grava as duas
     categorias, ou nenhuma."""
@@ -293,6 +417,132 @@ class CarrinhoPaginasTests(BaseDeTeste):
         resposta = cliente.post(
             reverse("catalogo:produto", args=["jambu"]),
             {"quantidade": "2"}
+        )
+
+        self.assertEqual(resposta.status_code, 403)
+
+class FechamentoPaginasTests(BaseDeTeste):
+
+    def guardar_carrinho(self, carrinho):
+        sessao = self.client.session
+        sessao["carrinho"] = carrinho
+        sessao.save()
+
+    def dados_do_formulario(self):
+        return {
+            "comprador": "Maria",
+            "telefone": "(91) 90000-0000",
+            "ponto_retirada": str(self.ponto.pk),
+        }
+
+    def carrinho_valido(self):
+        return {
+            str(self.jambu.pk): "3",
+            str(self.farinha.pk): "3",
+        }
+
+    def test_carrinho_vazio_redireciona_para_carrinho(self):
+        resposta = self.client.get(
+            reverse("pedidos:checkout")
+        )
+
+        self.assertRedirects(
+            resposta,
+            reverse("pedidos:carrinho")
+        )
+
+    def test_carrinho_com_itens_abre_checkout(self):
+        self.guardar_carrinho(self.carrinho_valido())
+
+        resposta = self.client.get(
+            reverse("pedidos:checkout")
+        )
+
+        self.assertEqual(resposta.status_code, 200)
+        self.assertTemplateUsed(
+            resposta,
+            "pedidos/checkout.html"
+        )
+
+    def test_post_valido_cria_pedido_e_esvazia_carrinho(self):
+        self.guardar_carrinho(self.carrinho_valido())
+
+        resposta = self.client.post(
+            reverse("pedidos:checkout"),
+            self.dados_do_formulario()
+        )
+
+        pedido = Pedido.objects.get()
+
+        self.assertRedirects(
+            resposta,
+            reverse(
+                "pedidos:pedido",
+                kwargs={"codigo": pedido.codigo}
+            )
+        )
+
+        self.assertEqual(Pedido.objects.count(), 1)
+        self.assertNotIn("carrinho", self.client.session)
+
+    def test_pedido_abaixo_do_minimo_mostra_erro(self):
+        self.guardar_carrinho({
+            str(self.jambu.pk): "2"
+        })
+
+        resposta = self.client.post(
+            reverse("pedidos:checkout"),
+            self.dados_do_formulario()
+        )
+
+        self.assertEqual(resposta.status_code, 200)
+        self.assertContains(resposta, "2,00")
+        self.assertEqual(Pedido.objects.count(), 0)
+
+    def test_preco_forjado_nao_altera_preco_do_item(self):
+        self.guardar_carrinho(self.carrinho_valido())
+
+        dados = self.dados_do_formulario()
+        dados["preco"] = "1"
+
+        resposta = self.client.post(
+            reverse("pedidos:checkout"),
+            dados
+        )
+
+        self.assertEqual(resposta.status_code, 302)
+
+        item = ItemPedido.objects.get(
+            pedido=Pedido.objects.get(),
+            produto=self.jambu
+        )
+
+        # O teste passa porque FechamentoForm não lê o campo "preco".
+        # A defesa está no serviço, que usa produto.preco_centavos do banco.
+        self.assertEqual(item.preco_unitario_centavos, 400)
+
+    def test_codigo_inexistente_retorna_404(self):
+        resposta = self.client.get(
+            reverse(
+                "pedidos:pedido",
+                kwargs={
+                    "codigo": "00000000-0000-0000-0000-000000000000"
+                }
+            )
+        )
+
+        self.assertEqual(resposta.status_code, 404)
+
+    def test_post_sem_token_csrf_retorna_403(self):
+        cliente = self.client_class(
+            enforce_csrf_checks=True
+        )
+
+        self.guardar_carrinho(self.carrinho_valido())
+
+        resposta = cliente.post(
+            reverse("pedidos:checkout"),
+            self.dados_do_formulario()
         )
 
         self.assertEqual(resposta.status_code, 403)
